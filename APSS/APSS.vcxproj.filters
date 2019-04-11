@@ -16,10 +16,8 @@
     <Filter Include="소스 파일\06Chapter">
       <UniqueIdentifier>{e29cbe12-f33e-473b-9ab1-3ac595618e16}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="06.08CLOCKSYNC.cpp">
-      <Filter>소스 파일\06Chapter</Filter>
-    </ClCompile>
+    <Filter Include="소스 파일\Temp">
+      <UniqueIdentifier>{d63f371b-d4b1-4076-8db5-15306a1da306}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
