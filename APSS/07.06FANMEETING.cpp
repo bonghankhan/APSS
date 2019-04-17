@@ -4,34 +4,26 @@
 #include <iterator>
 #include <string>
 
-#define MAX 21
-
 using namespace std;
 
 void normalize(vector<int>& num) {
-	for (int i = 0; i < num.size(); i++) {
-		num[i] = num[i] == 0 ? 1 : 0;
-	}
-	/*
 	num.push_back(0);
 
-	for (int i = 0; i < num.size(); i++) {
+	for (int i = 0; i < num.size() - 1; i++) {
 		if (num[i] < 0) {
-			int borrow = (abs(num[i]) + 9) / 10;
+			int borrow  = (abs(num[i]) + 9) / 10;
 			num[i + 1] -= borrow;
-			num[i] += borrow * 10;
+			num[i]     += borrow * 10;
 		}
 		else {
 			num[i + 1] += num[i] / 10;
-			num[i] %= 10;
+			num[i]     %= 10;
 		}
 	}
 
-	while (num.size() > 1 && num.back() == 0)
-	{
+	if (num.back() == 0) {
 		num.pop_back();
-	}
-	*/
+	}	
 }
 
 vector<int> multiply(const vector<int>& a, const vector<int>& b) {
@@ -43,38 +35,43 @@ vector<int> multiply(const vector<int>& a, const vector<int>& b) {
 		}
 	}
 
-	normalize(c);
+	//normalize(c);
 
 	return c;
 }
 
 void addTo(vector<int>& a, const vector<int>& b, int k) {
+	a.resize(max(a.size(), b.size() + k));
 	for (int i = 0; i < b.size(); i++) {
 		a[i + k] += b[i];
 	}
 
+	//normalize(a);
 }
 
 void subFrom(vector<int>&a, const vector<int>& b) {
+	a.resize(max(a.size(), b.size()));
 	for (int i = 0; i < b.size(); i++) {
 		a[i] -= b[i];
 	}
+
+	//normalize(a);
 }
-
-
 
 vector<int> karatsuba(const vector<int>& a, const vector<int>& b) {
 	int an = a.size(), bn = b.size();
+	
 	
 	if (an < bn) {
 		return karatsuba(b, a);
 	}
 
+
 	if (an == 0 || bn == 0) {
 		return vector<int>();
 	}
 
-	if (an <= 50) {
+	if (an <= 2) {
 		return multiply(a, b);
 	}
 
@@ -102,43 +99,51 @@ vector<int> karatsuba(const vector<int>& a, const vector<int>& b) {
 	addTo(ret, z2, half + half);
 
 	return ret;
-
 }
 
 int hugs(const string& members, const string& fans) {
+	vector<int> A, B;
 
-
-	int N = members.size(), M = fans.size();
-
-	vector<int> A(N), B(M);
-
-	for (int i = 0; i < N; i++) {
-		A[i] = (members[i] == 'M');
+	for (char c : members) {
+		A.push_back(c == 'M');
 	}
 
-	for (int i = 0; i < M; i++) {
-		B[i] = (fans[i] == 'M');
+	for (char c : fans) {
+		B.push_back(c == 'M');
 	}
 
+	/*
+		팬미팅 문제를 karatsuba 알고리즘을 이용하기 위해서는
+		a * b = 1234 * 1234가 아닌 a * b = 1234 * 4321로 인수를 전달해야 한다.
+	*/
+	reverse(B.begin(), B.end());
+	
 	vector<int> C = karatsuba(A, B);
-
-	int allHugs = 0;
-
-	for (int i = N - 1; i < M ; i++) {
-		if (C[i] == 0) {
+	int allHugs   = 0;
+	// 멤버전체가 팬들과 만나야 되므로 결과의 중간을 취해서 카운트를 해야 한다.
+	vector<int> sub(C.begin() + A.size() - 1, C.begin() + B.size()); 
+	
+	for (int i : sub) {
+		if (!i) {
 			allHugs++;
 		}
 	}
 
+	/*int N = A.size(), M = B.size();
+	for (int i = N - 1; i < M ; i++) {
+		if (C[i] == 0) {
+			allHugs++;
+		}
+	}*/
+
 	return allHugs;
-
 }
-
 
 int main() {
 	int testCase;
 	vector<int> result;
 	string members, fans;
+
 	cin >> testCase;
 
 	while (testCase--) {
@@ -156,7 +161,8 @@ int main() {
 }
 
 /*
-4
+input:
+8
 FFFMMM
 MMMFFF
 FFFFF
@@ -165,4 +171,22 @@ FFFFM
 FFFFFMMMMF
 MFMFMFFFMMMFMF
 MMFFFFFMFFFMFFFFFFMFFFMFFFFMFMMFFFFFFF
+MF
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMFMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMFMMMMMMMMMMMMMMMMMMMMMMF
+MM
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFMFFFFFFFFF
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+output:
+1
+6
+2
+2
+2
+127
+0
+11
 */
